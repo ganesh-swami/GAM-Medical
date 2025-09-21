@@ -404,7 +404,8 @@ class NavBar extends Component {
                   </span>
                 </Tooltip>
               </Styled.PresentationTitle>
-              {this.renderModal(isModalOpen, this.setModalIsOpen, 'low', SessionDetailsModal)}
+
+              {/* {this.renderModal(isModalOpen, this.setModalIsOpen, 'low', SessionDetailsModal)} */}
               <RecordingIndicator
                 amIModerator={amIModerator}
                 currentUserId={currentUserId}
