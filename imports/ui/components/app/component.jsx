@@ -126,7 +126,7 @@ class App extends Component {
       isVideoPreviewModalOpen: false,
       presentationFitToWidth: false,
       isJoinLogged: false,
-      isAudioVideoJoinModalOpen: true,
+      isAudioVideoJoinModalOpen: window.innerWidth >= 400,
     };
 
     this.timeOffsetInterval = null;
