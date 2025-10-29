@@ -146,6 +146,12 @@ const hasMicrophonePermission = async ({
           stream.removeTrack(track);
         });
 
+        // Update permission status after successful getUserMedia (for Safari)
+        // Use setTimeout to allow the browser to update its internal state
+        if (AudioManager._updatePermissionStatusAfterGUM) {
+          setTimeout(() => AudioManager._updatePermissionStatusAfterGUM(), 100);
+        }
+
         return true;
       })
       .catch((error) => {

@@ -210,6 +210,8 @@ const AudioVideoPreviewContainer = (props) => {
         checkMicrophonePermission: AudioService.checkMicrophonePermission,
         updateInputDevices: AudioService.updateInputDevices,
         updateOutputDevices: AudioService.updateOutputDevices,
+        doGUM: AudioService.doGUM,
+        getAudioConstraints: AudioService.getAudioConstraints,
         joinMic,
         joinListenOnly:AudioService.joinListenOnly,
         setAway,

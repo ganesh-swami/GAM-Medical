@@ -192,6 +192,35 @@ class AudioManager {
     }
   }
 
+  _updatePermissionStatusAfterGUM() {
+    // Re-query permission status after getUserMedia to handle browsers like Safari
+    // that don't immediately update the Permissions API state
+    if (navigator?.permissions?.query) {
+      navigator.permissions.query({ name: 'microphone' })
+        .then((status) => {
+          if (status.state !== this.permissionStatus) {
+            logger.debug({
+              logCode: 'audiomanager_permission_status_updated_after_gum',
+              extraInfo: {
+                oldStatus: this.permissionStatus,
+                newStatus: status.state,
+              },
+            }, `Permission status updated after getUserMedia: ${this.permissionStatus} -> ${status.state}`);
+            this.permissionStatus = status.state;
+          }
+        })
+        .catch((error) => {
+          logger.warn({
+            logCode: 'audiomanager_permission_update_failed',
+            extraInfo: {
+              errorName: error.name,
+              errorMessage: error.message,
+            },
+          }, `Failed to update permission status after getUserMedia: ${error.message}`);
+        });
+    }
+  }
+
   _applyCachedOutputDeviceId() {
     const cachedId = getStoredAudioOutputDeviceId();
 
@@ -577,6 +606,8 @@ class AudioManager {
         const constraints = getAudioConstraints({ deviceId: this?.bridge?.inputDeviceId });
 
         this.inputStream = await doGUM({ audio: constraints }, true);
+        // Update permission status after successful getUserMedia (for Safari)
+        this._updatePermissionStatusAfterGUM();
         await enumDevicesIfNecessary();
 
         // eslint-disable-next-line no-param-reassign

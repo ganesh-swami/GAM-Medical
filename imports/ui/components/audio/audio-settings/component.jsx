@@ -468,7 +468,13 @@ class AudioSettings extends React.Component {
       audio: getAudioConstraints({ deviceId: inputDeviceId }),
     };
 
-    return doGUM(constraints, true);
+    return doGUM(constraints, true).then((generatedStream) => {
+      // Update permission status after successful getUserMedia (for Safari)
+      if (AudioManager._updatePermissionStatusAfterGUM) {
+        setTimeout(() => AudioManager._updatePermissionStatusAfterGUM(), 100);
+      }
+      return generatedStream;
+    });
   }
 
   renderAudioCaptionsSelector() {

@@ -36,6 +36,7 @@ import {
 } from '/imports/ui/components/audio/audio-graphql/audio-controls/input-stream-live-selector/service';
 import Button from '/imports/ui/components/common/button/component';
 import { hasMediaDevicesEventTarget } from '/imports/ui/services/webrtc-base/utils';
+import AudioManager from '/imports/ui/services/audio-manager';
 
 const VIEW_STATES = {
   finding: 'finding',
@@ -773,6 +774,33 @@ class VideoPreview extends Component {
           },
         }, `Audio settings: error enumerating devices - {${error.name}: ${error.message}}`);
       });
+  }
+
+  generateInputStream(inputDeviceId) {
+    const { doGUM, getAudioConstraints } = this.props;
+    const { stream } = this.state;
+
+    if (inputDeviceId && stream) {
+      const currentDeviceId = MediaStreamUtils.extractDeviceIdFromStream(stream, 'audio');
+
+      if (currentDeviceId === inputDeviceId) return Promise.resolve(stream);
+
+      MediaStreamUtils.stopMediaStreamTracks(stream);
+    }
+
+    if (inputDeviceId === 'listen-only') return Promise.resolve(null);
+
+    const constraints = {
+      audio: getAudioConstraints({ deviceId: inputDeviceId }),
+    };
+
+    return doGUM(constraints, true).then((generatedStream) => {
+      // Update permission status after successful getUserMedia (for Safari)
+      if (AudioManager._updatePermissionStatusAfterGUM) {
+        setTimeout(() => AudioManager._updatePermissionStatusAfterGUM(), 100);
+      }
+      return generatedStream;
+    });
   }
 
   async startCameraBrightness(initialState = DEFAULT_BRIGHTNESS_STATE) {
@@ -1849,6 +1877,8 @@ class VideoPreview extends Component {
 
     const { isIe } = browserInfo;
 
+    console.log("@now ", this.props);
+
     return (
       <>
         {isIe ? (
@@ -2067,15 +2097,11 @@ class VideoPreview extends Component {
       && !(webcamDeviceId === cameraAsContentDeviceId)
       && isVirtualBackgroundSupported()
 
-    // return (<>
-    // <h1>hhhhhhhhhhhhhhhhhhhh</h1>
-    // </>)
+
 
     return (
       <div>
-        {/* <h1>hhhhhhhhhhhhhhhhhhhh</h1> */}
       <Styled.AudioVideoPreviewModal
-        // onRequestClose={this.handleProceed}
         onRequestClose={()=>{}}
         contentLabel={intl.formatMessage(intlMessages.webcamSettingsTitle)}
         shouldShowCloseButton={false}
