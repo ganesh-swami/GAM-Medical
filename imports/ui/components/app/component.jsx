@@ -121,12 +121,17 @@ const propTypes = {
 class App extends Component {
   constructor(props) {
     super(props);
+
+    // Don't auto-open modal on mobile devices (phones and tablets)
+    // deviceInfo.isMobile includes both phones and tablets (including iOS 13+ iPads)
+    const shouldAutoOpenModal = !deviceInfo.isMobile && window.innerWidth > 768;
+
     this.state = {
       isAudioModalOpen: false,
       isVideoPreviewModalOpen: false,
       presentationFitToWidth: false,
       isJoinLogged: false,
-      isAudioVideoJoinModalOpen: window.innerWidth >= 400,
+      isAudioVideoJoinModalOpen: shouldAutoOpenModal,
     };
 
     this.timeOffsetInterval = null;
@@ -228,7 +233,7 @@ class App extends Component {
   }
 
   setAudioModalIsOpen(value) {
-    console.log("@gs1 setAudioModalIsOpen ",value);
+    console.log("@gs1 setAudioModalIsOpen ", value);
     this.setState({ isAudioModalOpen: value });
   }
 
@@ -387,23 +392,23 @@ class App extends Component {
           <WebcamContainer />
           {
             !isNonMediaLayout
-              && <ExternalVideoPlayerContainer />
+            && <ExternalVideoPlayerContainer />
           }
           <GenericContentMainAreaContainer
             genericMainContentId={genericMainContentId}
           />
           {
-          shouldShowPresentation
-            ? (
-              <PresentationContainer
-                setPresentationFitToWidth={this.setPresentationFitToWidth}
-                fitToWidth={presentationFitToWidth}
-                darkTheme={darkTheme}
-                presentationIsOpen={presentationIsOpen}
-              />
-            )
-            : null
-            }
+            shouldShowPresentation
+              ? (
+                <PresentationContainer
+                  setPresentationFitToWidth={this.setPresentationFitToWidth}
+                  fitToWidth={presentationFitToWidth}
+                  darkTheme={darkTheme}
+                  presentationIsOpen={presentationIsOpen}
+                />
+              )
+              : null
+          }
           {
             !isNonMediaLayout
             && <ScreenshareContainer shouldShowScreenshare={shouldShowScreenshare} />
@@ -417,9 +422,9 @@ class App extends Component {
             ) : null}
           <AudioCaptionsSpeechContainer />
           {this.renderAudioCaptions()}
-          { (
+          {(
             !hideNotificationToasts
-            && isNotificationEnabled) && <PresentationUploaderToastContainer intl={intl} /> }
+            && isNotificationEnabled) && <PresentationUploaderToastContainer intl={intl} />}
           <UploaderContainer />
           <BreakoutJoinConfirmationContainerGraphQL />
           <BBBLiveKitRoomContainer />
@@ -433,27 +438,27 @@ class App extends Component {
             />
           )} */}
           {isAudioVideoJoinModalOpen ? (
-        <AudioVideoPreviewContainer
-          {...{
-            callbackToClose: () => {
-              this.setAudioVideoJoinModalIsOpen(false);
-            },
-            priority: 'medium',
-            setIsOpen: this.setAudioVideoJoinModalIsOpen,
-            isOpen: isAudioVideoJoinModalOpen,
-          }}
-        />
-      ) : null}
+            <AudioVideoPreviewContainer
+              {...{
+                callbackToClose: () => {
+                  this.setAudioVideoJoinModalIsOpen(false);
+                },
+                priority: 'medium',
+                setIsOpen: this.setAudioVideoJoinModalIsOpen,
+                isOpen: isAudioVideoJoinModalOpen,
+              }}
+            />
+          ) : null}
           <AudioContainer {...{
             isAudioModalOpen,
             setAudioModalIsOpen: this.setAudioModalIsOpen,
-            isVideoPreviewModalOpen:false,
+            isVideoPreviewModalOpen: false,
             setVideoPreviewModalIsOpen: this.setVideoPreviewModalIsOpen,
           }}
           />
-          { (
+          {(
             !hideNotificationToasts
-            && isNotificationEnabled) && <ToastContainer rtl /> }
+            && isNotificationEnabled) && <ToastContainer rtl />}
           <ChatAlertContainerGraphql />
           {isRaiseHandEnabled && <RaiseHandNotifier />}
           <ManyWebcamsNotifier />
